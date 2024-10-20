@@ -1,22 +1,22 @@
 import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { existsSync } from 'fs';
+import { exec, ExecException } from 'child_process';
 
 
 interface VCSyncSettings {
 	remote: string;
+	commit_message_template: string;
 	period: number;
 }
 
 const DEFAULT_SETTINGS: Partial<VCSyncSettings> = {
 	remote: '',
+	commit_message_template: "SYNC YY/MM/DD HH:mm",
 	period: 0
 };
 
 export default class VCSyncPlugin extends Plugin {
 
-//is remote in data.json?
-//  yes - load into remote variable
-//  no - produce error, ask for origin
 	settings: VCSyncSettings;
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -27,24 +27,29 @@ export default class VCSyncPlugin extends Plugin {
 	}
 
 
-
-
-	vault = this.app.vault.adapter
-	remote = ""
+	vault = this.app.vault.adapter;
 	setup_commands = ["git init"];
 	commands = ["git add .", "git commit -m ", "git push origin main"];
 
 	async onload() {
+		await this.loadSettings();
+
 		this.addSettingTab(new SettingTab(this.app, this));
+
 		//check if .git is present
 		this.vault.exists("/.git/").then(
 			(value) => {
 				if(!value){
 					//no repo found. run setup
+					exec("git init", (err:ExecException | null, stdout:string, stderr:string) => {
+						if(err) {
+							new Notice("failed to create local Repository. Is Git setup?");
+						}
+					})
 				}
 			});
-
-		await this.loadSettings();
+		
+		
 		
 	}
 
@@ -80,6 +85,22 @@ export class SettingTab extends PluginSettingTab{
 				await this.plugin.saveSettings();
 			  })
 		  );
+
+		new Setting(containerEl)
+		.setName("Commit Message Template")
+		.setDesc("Template for easy commit message")
+		.addText((text) =>
+		text.setPlaceholder("SYNC YY/MM/DD HH:mm").
+		setValue(this.plugin.settings.commit_message_template)
+		.onChange(async (value)=> {
+			if(value){
+			this.plugin.settings.commit_message_template = value;
+			await this.plugin.saveSettings();
+			}
+		})
+	)
+		;
+
 		new ButtonComponent(containerEl)
 		.setButtonText("Sync Now")
 		.onClick(() => new Notice("we are syncing we are syncing!"));
