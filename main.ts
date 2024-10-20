@@ -1,7 +1,16 @@
-import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { existsSync } from 'fs';
-import { exec, ExecException } from 'child_process';
-
+import {
+	App,
+	ButtonComponent,
+	Editor,
+	MarkdownView,
+	Modal,
+	Notice,
+	Plugin,
+	PluginSettingTab,
+	Setting,
+} from "obsidian";
+import { existsSync } from "fs";
+import { exec, ExecException } from "child_process";
 
 interface VCSyncSettings {
 	remote: string;
@@ -10,22 +19,24 @@ interface VCSyncSettings {
 }
 
 const DEFAULT_SETTINGS: Partial<VCSyncSettings> = {
-	remote: '',
+	remote: "",
 	commit_message_template: "SYNC YY/MM/DD HH:mm",
-	period: 0
+	period: 0,
 };
 
 export default class VCSyncPlugin extends Plugin {
-
 	settings: VCSyncSettings;
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
-
 
 	vault = this.app.vault.adapter;
 	setup_commands = ["git init"];
@@ -36,76 +47,121 @@ export default class VCSyncPlugin extends Plugin {
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
+		this.addRibbonIcon("folder-sync", "Sync", this.doSync);
+
 		//check if .git is present
-		this.vault.exists("/.git/").then(
-			(value) => {
-				if(!value){
-					//no repo found. run setup
-					exec("git init", (err:ExecException | null, stdout:string, stderr:string) => {
-						if(err) {
-							new Notice("failed to create local Repository. Is Git setup?");
+		this.vault.exists("/.git/").then((value) => {
+			if (!value) {
+				//no repo found. run setup
+				exec(
+					"git init",
+					(
+						err: ExecException | null,
+						stdout: string,
+						stderr: string
+					) => {
+						if (err) {
+							new Notice(
+								"failed to create local Repository. Is Git setup?"
+							);
 						}
-					})
+					}
+				);
+			}
+		});
+	}
+
+	async doSync() {
+		//get current date and time
+		let message = "stub";
+		let proceed = true;
+		for (const command of this.commands) {
+			if (proceed) {
+				exec(
+					command,
+					(
+						err: ExecException | null,
+						stdout: string,
+						stderr: string
+					) => {
+						if (err) {
+							new Notice(
+								"Sync failed. Could be a bad configuration, could be bad internet, could be a bug."
+							);
+							console.log(stderr);
+						} else {
+							console.log(stdout);
+						}
+					}
+				);
+			}
+		}
+	}
+
+	async updateRemote() {
+		if (this.settings.remote) {
+			exec(
+				"git remote add origin " + this.settings.remote,
+				(err: ExecException | null, stdout: string, stderr: string) => {
+					if (err) {
+						new Notice(
+							"failed to connect to remote repository. Is the URL correct?"
+						);
+					}
 				}
-			});
-		
-		
-		
+			);
+		}
 	}
 
 	async onunload() {
-		//auto-sync 
+		//auto-sync
 	}
 }
 
-
-export class SettingTab extends PluginSettingTab{
+export class SettingTab extends PluginSettingTab {
 	plugin: VCSyncPlugin;
 
-	
 	constructor(app: App, plugin: VCSyncPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
-	  }
-	
-	  display(): void {
+	}
+
+	display(): void {
 		let { containerEl } = this;
-	
+
 		containerEl.empty();
-	
-		new Setting(containerEl)
-		  .setName('Remote URL')
-		  .setDesc('Remote URL for remote repository.')
-		  .addText((text) =>
-			text
-			  .setPlaceholder('https://github.com/...')
-			  .setValue(this.plugin.settings.remote)
-			  .onChange(async (value) => {
-				this.plugin.settings.remote = value;
-				await this.plugin.saveSettings();
-			  })
-		  );
 
 		new Setting(containerEl)
-		.setName("Commit Message Template")
-		.setDesc("Template for easy commit message")
-		.addText((text) =>
-		text.setPlaceholder("SYNC YY/MM/DD HH:mm").
-		setValue(this.plugin.settings.commit_message_template)
-		.onChange(async (value)=> {
-			if(value){
-			this.plugin.settings.commit_message_template = value;
-			await this.plugin.saveSettings();
-			}
-		})
-	)
-		;
+			.setName("Remote URL")
+			.setDesc("Remote URL for remote repository.")
+			.addText((text) =>
+				text
+					.setPlaceholder("https://github.com/...")
+					.setValue(this.plugin.settings.remote)
+					.onChange(async (value) => {
+						this.plugin.settings.remote = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Commit Message Template")
+			.setDesc("Template for easy commit message")
+			.addText((text) =>
+				text
+					.setPlaceholder("SYNC YY/MM/DD HH:mm")
+					.setValue(this.plugin.settings.commit_message_template)
+					.onChange(async (value) => {
+						if (value) {
+							this.plugin.settings.commit_message_template =
+								value;
+							await this.plugin.saveSettings();
+						}
+					})
+			);
 
 		new ButtonComponent(containerEl)
-		.setButtonText("Sync Now")
-		.onClick(() => new Notice("we are syncing we are syncing!"));
-
-
-	  }
-
+			.setButtonText("Sync Now")
+			.onClick(() => new Notice("we are syncing we are syncing!"));
+	}
 }
