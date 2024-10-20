@@ -17,7 +17,7 @@ flowchart TD
 - A repository to push to, with a valid url.
 - You have access to the repository you are pushing to.
 ## TODO
-- [ ] fiure out how to automate git vcs.
+- [ ] Figure out how to automate git vcs.
 - [ ] Add and edit remote.
 - [ ] Sync with remote by pressing a button.
 - [ ] Commit message template configuration.
