@@ -73,12 +73,14 @@ export default class VCSyncPlugin extends Plugin {
 
 
 	doSync() {
-		//get current date and time
-		let message = moment().format("yyyy-MM-DD:HH:mm:ss");
+		//get current date and time		
+		let message = moment().format("yyyy-MM-DD:HH:mm:ss"); // TODO: change to an customizable message
 		let proceed = true;
-		let commands = ["git add .", "git commit -m \"\"" + message, "git push origin main"];
+		let commands = ["git add .", "git commit -m \" SYNC " + message + "\"", "git push origin main"];
 
 		new Notice("SYNC " + message + " in progress");
+
+
 		for (const command of commands) {
 			if (proceed) {
 				console.log(command);
@@ -109,6 +111,16 @@ export default class VCSyncPlugin extends Plugin {
 				"git remote add origin " + this.settings.remote,
 				(err: ExecException | null, stdout: string, stderr: string) => {
 					if (err) {
+						if(stderr === "remote origin already exists") {
+							exec(
+								"git remote set-url origin " + this.settings.remote, 
+								(err: ExecException | null, stdout: string, stderr: string) => {
+									if (err) {
+										new Notice("Remote seems invalid");
+										return;
+									}
+								})
+						}
 						new Notice(
 							"failed to connect to remote repository. Is the URL correct?"
 						);
@@ -145,6 +157,13 @@ export class SettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					})
 			);
+
+		new ButtonComponent(containerEl)
+		.setButtonText("Register remote")
+		.onClick(() => {
+			this.plugin.updateRemote();
+
+		})
 
 		new ButtonComponent(containerEl)
 			.setButtonText("Sync Now")
