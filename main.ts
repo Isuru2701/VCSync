@@ -11,16 +11,15 @@ import {
 } from "obsidian";
 import { existsSync } from "fs";
 import { exec, ExecException } from "child_process";
+var moment = require("moment");
 
 interface VCSyncSettings {
 	remote: string;
-	commit_message_template: string;
 	period: number;
 }
 
 const DEFAULT_SETTINGS: Partial<VCSyncSettings> = {
 	remote: "",
-	commit_message_template: "SYNC YY/MM/DD HH:mm",
 	period: 0,
 };
 
@@ -40,14 +39,15 @@ export default class VCSyncPlugin extends Plugin {
 
 	vault = this.app.vault.adapter;
 	setup_commands = ["git init"];
-	commands = ["git add .", "git commit -m ", "git push origin main"];
 
 	async onload() {
 		await this.loadSettings();
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
-		this.addRibbonIcon("folder-sync", "Sync", this.doSync);
+		this.addRibbonIcon("folder-sync", "Sync", ()=> {
+			this.doSync()
+		});
 
 		//check if .git is present
 		this.vault.exists("/.git/").then((value) => {
@@ -62,7 +62,7 @@ export default class VCSyncPlugin extends Plugin {
 					) => {
 						if (err) {
 							new Notice(
-								"failed to create local Repository. Is Git setup?"
+								"failed to create local Repository. Is Git configured?"
 							);
 						}
 					}
@@ -71,12 +71,17 @@ export default class VCSyncPlugin extends Plugin {
 		});
 	}
 
-	async doSync() {
+
+	doSync() {
 		//get current date and time
-		let message = "stub";
+		let message = moment().format("yyyy-MM-DD:HH:mm:ss");
 		let proceed = true;
-		for (const command of this.commands) {
+		let commands = ["git add .", "git commit -m \"\"" + message, "git push origin main"];
+
+		new Notice("SYNC " + message + " in progress");
+		for (const command of commands) {
 			if (proceed) {
+				console.log(command);
 				exec(
 					command,
 					(
@@ -113,9 +118,6 @@ export default class VCSyncPlugin extends Plugin {
 		}
 	}
 
-	async onunload() {
-		//auto-sync
-	}
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -141,22 +143,6 @@ export class SettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.remote = value;
 						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Commit Message Template")
-			.setDesc("Template for easy commit message")
-			.addText((text) =>
-				text
-					.setPlaceholder("SYNC YY/MM/DD HH:mm")
-					.setValue(this.plugin.settings.commit_message_template)
-					.onChange(async (value) => {
-						if (value) {
-							this.plugin.settings.commit_message_template =
-								value;
-							await this.plugin.saveSettings();
-						}
 					})
 			);
 
