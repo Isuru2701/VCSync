@@ -5,7 +5,7 @@ A quick and easy way to use Git for syncing your vault. Built on a plug-and-play
 ## Usage
 ```mermaid
 flowchart TD
-    A[Install] --> B[Add remote]
+    A[Install] --> B[Setup]
     B--> C[Make Changes Locally]
     C--> D[Sync]
     D --> C
@@ -17,6 +17,7 @@ flowchart TD
 - A repository to push to, with a valid url.
 - You have access to the repository you are pushing to.
 ## TODO
+- [ ] Setup for correct vault (ask user for vault)
 - [ ] Figure out how to automate git vcs.
 - [ ] Add and edit remote.
 - [ ] Sync with remote by pressing a button.
