@@ -21,7 +21,7 @@ flowchart TD
 - [ ] Figure out how to automate git vcs.
 - [x] Add and edit remote.
 - [ ] Sync with remote by pressing a button.
-- [ ] Commit message template configuration.
+- [x] Commit message template configuration.
 - [ ] Generate errors for:
   - [ ] Git not found.
   - [ ] Repo access denied.
