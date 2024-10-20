@@ -8,7 +8,7 @@ export default class HelloWorldPlugin extends Plugin {
 //  no - produce error, ask for origin
 
 
-
+vault = this.app.vault.adapter
 remote = ""
 setup_commands = ["git init"];
 commands = ["git add .", "git commit -m ", "git push origin main"];
@@ -16,14 +16,12 @@ commands = ["git add .", "git commit -m ", "git push origin main"];
 	async onload() {
 
 		//check if .git is present
-		//if not, run setup_commands
-		if(!existsSync(".git")){
-			new Notice("GIT NOT INIT");
-			new Notice(process.cwd());
-		}
-		else {
-			new Notice("GIT FOUND!");
-		}
+		this.vault.exists("/.git/").then(
+			(value) => {
+				if(!value){
+					//no repo found. run setup
+				}
+			});
 		
 	}
 
