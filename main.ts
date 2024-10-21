@@ -38,7 +38,8 @@ export default class VCSyncPlugin extends Plugin {
 	}
 
 	vault = this.app.vault.adapter;
-	setup_commands = ["git init"];
+	basePath = (this.app.vault.adapter as any).basePath;
+	setup_commands = ["cd "+ this.basePath, "git init"];
 
 	async onload() {
 		await this.loadSettings();
@@ -53,20 +54,15 @@ export default class VCSyncPlugin extends Plugin {
 		this.vault.exists("/.git/").then((value) => {
 			if (!value) {
 				//no repo found. run setup
-				exec(
-					"git init",
-					(
-						err: ExecException | null,
-						stdout: string,
-						stderr: string
-					) => {
-						if (err) {
-							new Notice(
-								"failed to create local Repository. Is Git configured?"
-							);
+				let proceed = true;
+				for(const command of this.setup_commands){
+					exec(command, (err: ExecException | null, stdout: string, stderr: string) => {
+						if(err) {
+							new Notice("Git setup failed.");
 						}
-					}
-				);
+				});
+				}
+
 			}
 		});
 	}
