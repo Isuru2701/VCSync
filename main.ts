@@ -58,7 +58,7 @@ export default class VCSyncPlugin extends Plugin {
 				for (const command of this.setup_commands) {
 					execSync(
 						command,
-						{ cwd: this.basePath, stdio:"inherit" }
+						{ cwd: this.basePath, stdio:['pipe', 'inherit', 'inherit'],  windowsHide:true }
 					);
 				}
 			}
@@ -70,7 +70,6 @@ export default class VCSyncPlugin extends Plugin {
 		let message = moment().format("yyyy-MM-DD HH:mm:ss"); // TODO: change to an customizable message
 		let proceed = true;
 		let commands = [
-			"git pull origin master",
 			"git add .",
 			'git commit -m " SYNC ' + message + '"',
 			"git push origin master",
@@ -81,9 +80,11 @@ export default class VCSyncPlugin extends Plugin {
 		for (const command of commands) {
 			if (proceed) {
 				console.log(command);
-				execSync(command, {cwd:this.basePath, stdio:"inherit"});
+				execSync(command, {cwd:this.basePath, stdio:['pipe', 'inherit', 'inherit'], windowsHide:true});
 			}
 		}
+
+		new Notice("Sync performed.");
 	}
 
 	async updateRemote() {
@@ -166,7 +167,7 @@ export class SettingTab extends PluginSettingTab {
 			});
 
 		new ButtonComponent(containerEl)
-			.setButtonText("Sync Now")
-			.onClick(() => new Notice("we are syncing we are syncing!"));
+			.setButtonText("Pull")
+			.onClick(() => new Notice("we are syncing we are syncing!")); //add logic to pull from repo
 	}
 }
