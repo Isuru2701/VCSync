@@ -45,9 +45,10 @@ If you would like to contribute to this project or customize this plugin, please
   - [x] Git not found.
   - [x] Push failed. 
   - [x] Repo access denied.
-- [ ] Pull changes.
-- [ ] Stylizing changes
-- [ ] Customization
+- [ ] Pulling.
+- [ ] Stylizing changes.
+- [ ] Message Customization.
+- [ ] Automatic pushes at a set interval.
 
 ## Aren't there other existing plugins?
 
