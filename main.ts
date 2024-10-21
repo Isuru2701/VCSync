@@ -77,7 +77,7 @@ export default class VCSyncPlugin extends Plugin {
 
 	doSync() {
 		//get current date and time
-		let message = moment().format("yyyy-MM-DD:HH:mm:ss"); // TODO: change to an customizable message
+		let message = moment().format("yyyy-MM-DD HH:mm:ss"); // TODO: change to an customizable message
 		let proceed = true;
 		let commands = [
 			"git pull origin master",
