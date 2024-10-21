@@ -1,7 +1,7 @@
 {
 	"id": "vcs-sync",
 	"name": "VCSync",
-	"version": "1.0.0",
+	"version": "alpha",
 	"minAppVersion": "0.15.0",
 	"description": "Extremely simplified Git syncing for Obsidian with the push of a button.",
 	"author": "Ruru",
