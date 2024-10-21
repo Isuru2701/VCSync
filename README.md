@@ -16,15 +16,17 @@ flowchart TD
 - You are logged into your GitHub Account from your device.
 - A repository to push to, with a valid url. The branch can only be master.
 - You have access to the repository you are pushing to.
+- Any files/folders you'd like to ignore must be added to a .gitignore in the vault seperately.
 ## TODO
 - [x] Setup for correct vault (autodetect)
-- [ ] Figure out how to automate git vcs.
+- [x] Figure out how to automate git vcs.
 - [x] Add and edit remote.
-- [ ] Sync with remote by pressing a button.
-- [x] Commit message template configuration.
-- [ ] Generate errors for:
-  - [ ] Git not found.
-  - [ ] Repo access denied.
+- [x] Push to remote by pressing a button.
+- [x] Commit message set to datetime.
+- [x] Generate errors for:
+  - [x] Git not found.
+  - [x] Push failed. 
+  - [x] Repo access denied.
 
 ## Aren't there other existing plugins?
 
