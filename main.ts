@@ -10,7 +10,7 @@ import {
 	Setting,
 } from "obsidian";
 import { existsSync } from "fs";
-import { exec, ExecException } from "child_process";
+import { exec, ExecException, execSync } from "child_process";
 var moment = require("moment");
 
 interface VCSyncSettings {
@@ -56,19 +56,9 @@ export default class VCSyncPlugin extends Plugin {
 				//no repo found. run setup
 				let proceed = true;
 				for (const command of this.setup_commands) {
-					exec(
+					execSync(
 						command,
-						{ cwd: this.basePath },
-						(
-							err: ExecException | null,
-							stdout: string,
-							stderr: string
-						) => {
-							if (err) {
-								// new Notice("Git setup failed.");
-								console.log(stderr);
-							}
-						}
+						{ cwd: this.basePath, stdio:"inherit" }
 					);
 				}
 			}
@@ -91,25 +81,7 @@ export default class VCSyncPlugin extends Plugin {
 		for (const command of commands) {
 			if (proceed) {
 				console.log(command);
-				exec(
-					command,
-					{ cwd: this.basePath },
-					(
-						err: ExecException | null,
-						stdout: string,
-						stderr: string
-					) => {
-						if (err) {
-							new Notice(
-								"Sync failed. Could be a bad configuration, could be bad internet, could be a bug."
-							);
-							console.log(stderr);
-							return;
-						} else {
-							console.log(stdout);
-						}
-					}
-				);
+				execSync(command, {cwd:this.basePath, stdio:"inherit"});
 			}
 		}
 	}
