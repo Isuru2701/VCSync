@@ -39,7 +39,7 @@ export default class VCSyncPlugin extends Plugin {
 
 	vault = this.app.vault.adapter;
 	basePath = (this.app.vault.adapter as any).basePath;
-	setup_commands = ["cd " + this.basePath, "git init"];
+	setup_commands = ["git init"];
 
 	async onload() {
 		await this.loadSettings();
@@ -65,7 +65,8 @@ export default class VCSyncPlugin extends Plugin {
 							stderr: string
 						) => {
 							if (err) {
-								new Notice("Git setup failed.");
+								// new Notice("Git setup failed.");
+								console.log(stderr);
 							}
 						}
 					);
@@ -79,10 +80,10 @@ export default class VCSyncPlugin extends Plugin {
 		let message = moment().format("yyyy-MM-DD:HH:mm:ss"); // TODO: change to an customizable message
 		let proceed = true;
 		let commands = [
-			"git pull",
+			"git pull origin master",
 			"git add .",
 			'git commit -m " SYNC ' + message + '"',
-			"git push origin main",
+			"git push origin master",
 		];
 
 		new Notice("SYNC " + message + " in progress");
