@@ -58,7 +58,7 @@ export default class VCSyncPlugin extends Plugin {
 				for (const command of this.setup_commands) {
 					execSync(command, {
 						cwd: this.basePath,
-						stdio: ["pipe", "inherit", "inherit"],
+						stdio: ["pipe", "inherit", "inherit", , "inherit"],
 						windowsHide: true,
 					});
 				}
@@ -83,7 +83,7 @@ export default class VCSyncPlugin extends Plugin {
 				console.log(command);
 				execSync(command, {
 					cwd: this.basePath,
-					stdio: ["pipe", "inherit", "inherit"],
+					stdio: ["pipe", "inherit", "inherit", "inherit"],
 					windowsHide: true,
 				});
 			}
