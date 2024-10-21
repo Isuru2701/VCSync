@@ -79,6 +79,7 @@ export default class VCSyncPlugin extends Plugin {
 		let message = moment().format("yyyy-MM-DD:HH:mm:ss"); // TODO: change to an customizable message
 		let proceed = true;
 		let commands = [
+			"git pull",
 			"git add .",
 			'git commit -m " SYNC ' + message + '"',
 			"git push origin main",
@@ -116,9 +117,15 @@ export default class VCSyncPlugin extends Plugin {
 		if (this.settings.remote) {
 			exec(
 				"git remote add origin " + this.settings.remote,
+				{ cwd: this.basePath },
 				(err: ExecException | null, stdout: string, stderr: string) => {
 					if (err) {
-						if (stderr === "remote origin already exists") {
+						//is error cuz remote exists? if so, change url
+						if (
+							stderr.includes(
+								"error: remote origin already exists."
+							)
+						) {
 							exec(
 								"git remote set-url origin " +
 									this.settings.remote,
@@ -130,14 +137,22 @@ export default class VCSyncPlugin extends Plugin {
 								) => {
 									if (err) {
 										new Notice("Remote seems invalid");
+										console.log("nest " + stderr);
+										return;
+									} else {
+										new Notice("successfully updated");
 										return;
 									}
 								}
 							);
+						} else {
+							new Notice(
+								"Failed to connect to remote repository. Is the URL correct?"
+							);
 						}
-						new Notice(
-							"failed to connect to remote repository. Is the URL correct?"
-						);
+						console.log(stderr);
+					} else {
+						new Notice("success!");
 					}
 				}
 			);
