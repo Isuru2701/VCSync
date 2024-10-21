@@ -39,15 +39,15 @@ export default class VCSyncPlugin extends Plugin {
 
 	vault = this.app.vault.adapter;
 	basePath = (this.app.vault.adapter as any).basePath;
-	setup_commands = ["cd "+ this.basePath, "git init"];
+	setup_commands = ["cd " + this.basePath, "git init"];
 
 	async onload() {
 		await this.loadSettings();
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
-		this.addRibbonIcon("folder-sync", "Sync", ()=> {
-			this.doSync()
+		this.addRibbonIcon("folder-sync", "Sync", () => {
+			this.doSync();
 		});
 
 		//check if .git is present
@@ -55,33 +55,43 @@ export default class VCSyncPlugin extends Plugin {
 			if (!value) {
 				//no repo found. run setup
 				let proceed = true;
-				for(const command of this.setup_commands){
-					exec(command, (err: ExecException | null, stdout: string, stderr: string) => {
-						if(err) {
-							new Notice("Git setup failed.");
+				for (const command of this.setup_commands) {
+					exec(
+						command,
+						{ cwd: this.basePath },
+						(
+							err: ExecException | null,
+							stdout: string,
+							stderr: string
+						) => {
+							if (err) {
+								new Notice("Git setup failed.");
+							}
 						}
-				});
+					);
 				}
-
 			}
 		});
 	}
 
-
 	doSync() {
-		//get current date and time		
+		//get current date and time
 		let message = moment().format("yyyy-MM-DD:HH:mm:ss"); // TODO: change to an customizable message
 		let proceed = true;
-		let commands = ["git add .", "git commit -m \" SYNC " + message + "\"", "git push origin main"];
+		let commands = [
+			"git add .",
+			'git commit -m " SYNC ' + message + '"',
+			"git push origin main",
+		];
 
 		new Notice("SYNC " + message + " in progress");
-
 
 		for (const command of commands) {
 			if (proceed) {
 				console.log(command);
 				exec(
 					command,
+					{ cwd: this.basePath },
 					(
 						err: ExecException | null,
 						stdout: string,
@@ -93,7 +103,6 @@ export default class VCSyncPlugin extends Plugin {
 							);
 							console.log(stderr);
 							return;
-							
 						} else {
 							console.log(stdout);
 						}
@@ -109,15 +118,22 @@ export default class VCSyncPlugin extends Plugin {
 				"git remote add origin " + this.settings.remote,
 				(err: ExecException | null, stdout: string, stderr: string) => {
 					if (err) {
-						if(stderr === "remote origin already exists") {
+						if (stderr === "remote origin already exists") {
 							exec(
-								"git remote set-url origin " + this.settings.remote, 
-								(err: ExecException | null, stdout: string, stderr: string) => {
+								"git remote set-url origin " +
+									this.settings.remote,
+								{ cwd: this.basePath },
+								(
+									err: ExecException | null,
+									stdout: string,
+									stderr: string
+								) => {
 									if (err) {
 										new Notice("Remote seems invalid");
 										return;
 									}
-								})
+								}
+							);
 						}
 						new Notice(
 							"failed to connect to remote repository. Is the URL correct?"
@@ -127,7 +143,6 @@ export default class VCSyncPlugin extends Plugin {
 			);
 		}
 	}
-
 }
 
 export class SettingTab extends PluginSettingTab {
@@ -157,11 +172,10 @@ export class SettingTab extends PluginSettingTab {
 			);
 
 		new ButtonComponent(containerEl)
-		.setButtonText("Register remote")
-		.onClick(() => {
-			this.plugin.updateRemote();
-
-		})
+			.setButtonText("Register remote")
+			.onClick(() => {
+				this.plugin.updateRemote();
+			});
 
 		new ButtonComponent(containerEl)
 			.setButtonText("Sync Now")
