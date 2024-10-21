@@ -92,6 +92,8 @@ export default class VCSyncPlugin extends Plugin {
 								"Sync failed. Could be a bad configuration, could be bad internet, could be a bug."
 							);
 							console.log(stderr);
+							return;
+							
 						} else {
 							console.log(stdout);
 						}
