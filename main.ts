@@ -56,10 +56,11 @@ export default class VCSyncPlugin extends Plugin {
 				//no repo found. run setup
 				let proceed = true;
 				for (const command of this.setup_commands) {
-					execSync(
-						command,
-						{ cwd: this.basePath, stdio:['pipe', 'inherit', 'inherit'],  windowsHide:true }
-					);
+					execSync(command, {
+						cwd: this.basePath,
+						stdio: ["pipe", "inherit", "inherit"],
+						windowsHide: true,
+					});
 				}
 			}
 		});
@@ -80,7 +81,11 @@ export default class VCSyncPlugin extends Plugin {
 		for (const command of commands) {
 			if (proceed) {
 				console.log(command);
-				execSync(command, {cwd:this.basePath, stdio:['pipe', 'inherit', 'inherit'], windowsHide:true});
+				execSync(command, {
+					cwd: this.basePath,
+					stdio: ["pipe", "inherit", "inherit"],
+					windowsHide: true,
+				});
 			}
 		}
 
@@ -166,8 +171,9 @@ export class SettingTab extends PluginSettingTab {
 				this.plugin.updateRemote();
 			});
 
-		new ButtonComponent(containerEl)
-			.setButtonText("Pull")
-			.onClick(() => new Notice("we are syncing we are syncing!")); //add logic to pull from repo
+		new ButtonComponent(containerEl).setButtonText("Pull").onClick(() => {
+			new Notice("Fetching");
+			execSync("git pull origin master", {cwd:this.plugin.basePath});
+		}); //add logic to pull from repo
 	}
 }

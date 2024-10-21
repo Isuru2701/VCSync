@@ -14,7 +14,7 @@ flowchart TD
 ## Prerequisites
 - [Git](https://git-scm.com/downloads) should be installed.
 - You are logged into your GitHub Account from your device.
-- A repository to push to, with a valid url.
+- A repository to push to, with a valid url. The branch can only be master.
 - You have access to the repository you are pushing to.
 ## TODO
 - [x] Setup for correct vault (autodetect)
